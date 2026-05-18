@@ -1,11 +1,7 @@
 package keletu.pvzmod.init;
 
 import keletu.pvzmod.PVZMod;
-import keletu.pvzmod.blocks.Carton;
-import keletu.pvzmod.blocks.PlantBoxBlock;
-import keletu.pvzmod.blocks.PlantBoxBlockEntity;
-import keletu.pvzmod.blocks.Pot;
-import keletu.pvzmod.blocks.PotBlockEntity;
+import keletu.pvzmod.blocks.*;
 import keletu.pvzmod.models.render.PotBlockRender;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -41,7 +37,12 @@ public class PVZBlocks {
             .sound(SoundType.GRASS)
             .noOcclusion()
     ));
-
+    public static final RegistryObject<Block> SOFA = BLOCKS.register("sofa", () -> new Sofa(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.WOOL)
+            .strength(1.0F)
+            .sound(SoundType.WOOL)
+            .noOcclusion()
+    ));
     public static final RegistryObject<BlockEntityType<PotBlockEntity>> POT_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("pot_entity",
                     () -> BlockEntityType.Builder.of(

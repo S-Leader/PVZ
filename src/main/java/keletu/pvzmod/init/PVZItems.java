@@ -21,6 +21,8 @@ public class PVZItems {
             () -> new BlockItem(PVZBlocks.POT.get(), new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> CARTON = ITEMS.register("carton",
             () -> new BlockItem(PVZBlocks.CARTON.get(), new Item.Properties().stacksTo(64)));
+    public static final RegistryObject<Item> SOFA = ITEMS.register("sofa",
+            () -> new BlockItem(PVZBlocks.SOFA.get(), new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> PEA = ITEMS.register("pea", () -> new Item(new Item.Properties()
             .food(new FoodProperties.Builder()
                     .nutrition(1)

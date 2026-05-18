@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "pvz_myh:block/sofa",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "pvz_myh:block/sofa"
+    },
+    "facing=south": {
+      "model": "pvz_myh:block/sofa",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "pvz_myh:block/sofa",
+      "y": 270
+    }
+  }
+}
