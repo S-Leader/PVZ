@@ -32,7 +32,6 @@ public final class PennyTradeOffers {
 
     private static final List<Entry> TOOL_POOL = List.of(
             new Entry(PVZItems.GARDEN_SHOVEL, 6, 1, TradeKind.TOOL),
-            new Entry(PVZItems.ENERGY_BEAN, 5, 1, TradeKind.TOOL),
             new Entry(PVZItems.PLANT_KEY, 3, 1, TradeKind.TOOL)
     );
 

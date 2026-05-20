@@ -3,7 +3,6 @@ package keletu.pvzmod.init;
 import keletu.pvzmod.PVZMod;
 import keletu.pvzmod.box.ItemPlantBox;
 import keletu.pvzmod.box.ItemPlantKey;
-import keletu.pvzmod.items.ItemEnergyBean;
 import keletu.pvzmod.items.ItemGardenShovel;
 import keletu.pvzmod.items.ItemPlantCard;
 import keletu.pvzmod.items.ItemSun;
@@ -31,9 +30,6 @@ public class PVZItems {
                     .fast()
                     .build())
             .stacksTo(64)));
-    public static final RegistryObject<Item> ENERGY_BEAN = ITEMS.register("energy_bean", () -> new ItemEnergyBean(new Item.Properties()
-            .stacksTo(16)
-            .rarity(Rarity.RARE)));
     public static final RegistryObject<Item> SUN = ITEMS.register("sun", () -> new ItemSun(new Item.Properties()
             .stacksTo(64)));
     public static final RegistryObject<Item> DIAMOND = ITEMS.register("diamond", () -> new ItemSun(new Item.Properties()
