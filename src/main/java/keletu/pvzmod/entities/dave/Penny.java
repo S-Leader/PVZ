@@ -186,6 +186,6 @@ public class Penny extends PathfinderMob implements Npc, Merchant, IPlantWontHur
     }
 
     private void setupAnimationStates() {
-        this.idleAnimation.start(this.tickCount);
+        this.idleAnimation.startIfStopped(this.tickCount);
     }
 }
