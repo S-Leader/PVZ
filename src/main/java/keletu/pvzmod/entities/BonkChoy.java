@@ -2,6 +2,7 @@ package keletu.pvzmod.entities;
 
 import keletu.pvzmod.init.PVZEffects;
 import keletu.pvzmod.init.PVZSounds;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -98,11 +99,11 @@ public class BonkChoy extends EntityPlantBase {
 
         this.attackMonster(target);
 
-        this.attackCooldown = ATTACK_ANIMATION_DURATION;
+        this.attackCooldown = attackCooldownTicks();
     }
 
     private Monster findNearestMonster() {
-        AABB attackBox = this.getBoundingBox().inflate(ATTACK_RANGE);
+        AABB attackBox = this.getBoundingBox().inflate(attackRange());
 
         List<Monster> monsters = this.level().getEntitiesOfClass(
                 Monster.class,
@@ -120,9 +121,10 @@ public class BonkChoy extends EntityPlantBase {
     }
 
     private void attackMonster(Monster target) {
-        boolean willKill = target.getHealth() <= ATTACK_DAMAGE;
+        float attackDamage = attackDamage();
+        boolean willKill = target.getHealth() <= attackDamage;
 
-        boolean uppercut = willKill || this.random.nextFloat() < UPPERCUT_CHANCE;
+        boolean uppercut = willKill || this.random.nextFloat() * 100.0F < uppercutChancePercent();
 
         if (uppercut) {
             this.playAttackAnimation(2);
@@ -138,7 +140,7 @@ public class BonkChoy extends EntityPlantBase {
         boolean oldHasImpulse = target.hasImpulse;
         boolean oldHurtMarked = target.hurtMarked;
 
-        boolean hurt = target.hurt(source, ATTACK_DAMAGE);
+        boolean hurt = target.hurt(source, attackDamage);
 
         target.invulnerableTime = 0;
 
@@ -148,7 +150,7 @@ public class BonkChoy extends EntityPlantBase {
 
         if (hurt && uppercut) {
             this.uppercutMonster(target);
-            target.addEffect(new MobEffectInstance(PVZEffects.STUN.get(), 10, 0));
+            target.addEffect(new MobEffectInstance(PVZEffects.STUN.get(), uppercutStunTicks(), 0));
             this.playSound(PVZSounds.BONKCHOY_HIT2.get(), 1.0F, 1.0F);
         } else {
             this.playSound(PVZSounds.BONKCHOY_HIT.get(), 1.0F, 1.0F);
@@ -160,7 +162,7 @@ public class BonkChoy extends EntityPlantBase {
 
         target.setDeltaMovement(
                 motion.x,
-                0.55D,
+                uppercutVerticalVelocity(),
                 motion.z
         );
 
@@ -171,6 +173,30 @@ public class BonkChoy extends EntityPlantBase {
     private void playAttackAnimation(int type) {
         this.entityData.set(ATTACK_ANIMATION, type);
         this.entityData.set(ATTACK_ANIMATION_TICK, ATTACK_ANIMATION_DURATION);
+    }
+
+    private double attackRange() {
+        return this.plantStatDouble(PlantStatManager.ATTACK_RANGE, ATTACK_RANGE);
+    }
+
+    private float attackDamage() {
+        return this.plantStatFloat(PlantStatManager.PROJECTILE_DAMAGE, ATTACK_DAMAGE);
+    }
+
+    private int attackCooldownTicks() {
+        return this.plantStatInt(PlantStatManager.COOLDOWN_TICKS, ATTACK_ANIMATION_DURATION, 1, 72000);
+    }
+
+    private float uppercutChancePercent() {
+        return this.plantStatFloat("uppercut_chance_percent", UPPERCUT_CHANCE * 100.0F);
+    }
+
+    private int uppercutStunTicks() {
+        return this.plantStatInt("uppercut_stun_ticks", 10, 1, 72000);
+    }
+
+    private double uppercutVerticalVelocity() {
+        return this.plantStatDouble("uppercut_vertical_velocity", 0.55D);
     }
 
     private void tickAnimationState() {

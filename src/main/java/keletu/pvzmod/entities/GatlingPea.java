@@ -3,6 +3,7 @@ package keletu.pvzmod.entities;
 import keletu.pvzmod.entities.ai.TrueRangedAttackGoal;
 import keletu.pvzmod.entities.projectile.PeaProjectile;
 import keletu.pvzmod.init.PVZItems;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.AnimationState;
@@ -29,12 +30,12 @@ public class GatlingPea extends EntityPlantShooterBase {
 
     @Override
     protected TrueRangedAttackGoal createRangedAttackGoal() {
-        return new TrueRangedAttackGoal(this, 0.0F, this.range, 4, 1, 20, 15);
+        return new TrueRangedAttackGoal(this, 0.0F, this.plantStatFloat(PlantStatManager.ATTACK_RANGE, this.range), 4, 1, 20, 15);
     }
 
     @Override
     public ThrowableProjectile entitySelect(Level world) {
-        PeaProjectile ent = new PeaProjectile(world, this, 3);
+        PeaProjectile ent = new PeaProjectile(world, this, this.plantStatFloat(PlantStatManager.PROJECTILE_DAMAGE, 3.0D));
         return ent;
     }
 

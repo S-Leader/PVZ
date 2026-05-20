@@ -52,8 +52,9 @@ public class SnowPeaProjectile extends ThrowableProjectile {
             boolean oldHurtMarked = mob.hurtMarked;
 
             LivingEntity owner = this.getOwner() instanceof LivingEntity livingOwner ? livingOwner : null;
+            int duration = this.shooter == null ? 100 : this.shooter.plantStatInt("snow_duration_ticks", 100, 1, 72000);
 
-            mob.addEffect(new MobEffectInstance(PVZEffects.SNOW.get(), 100, 0));
+            mob.addEffect(new MobEffectInstance(PVZEffects.SNOW.get(), duration, 0));
             mob.hurt(
                     this.damageSources().mobProjectile(this, owner),
                     this.damage

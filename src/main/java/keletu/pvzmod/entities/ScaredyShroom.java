@@ -4,6 +4,7 @@ import keletu.pvzmod.entities.ai.TrueRangedAttackGoal;
 import keletu.pvzmod.entities.projectile.SporeProjectile;
 import keletu.pvzmod.init.PVZItems;
 import keletu.pvzmod.init.PVZSounds;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -50,13 +51,13 @@ public class ScaredyShroom extends EntityPlantShooterBase {
 
     @Override
     public ThrowableProjectile entitySelect(Level world) {
-        SporeProjectile ent = new SporeProjectile(world, this, 3);
+        SporeProjectile ent = new SporeProjectile(world, this, this.plantStatFloat(PlantStatManager.PROJECTILE_DAMAGE, 3.0D));
         return ent;
     }
 
     @Override
     protected TrueRangedAttackGoal createRangedAttackGoal() {
-        return new TrueRangedAttackGoal(this, 0.0F, this.range, 1, 0, 30, 20);
+        return new TrueRangedAttackGoal(this, 0.0F, this.plantStatFloat(PlantStatManager.ATTACK_RANGE, this.range), 1, 0, 30, 20);
     }
 
     @Override
@@ -111,7 +112,7 @@ public class ScaredyShroom extends EntityPlantShooterBase {
             double toX = target.getX() - this.getX();
             double toZ = target.getZ() - this.getZ();
 
-            projectile.shoot(toX, 0, toZ, 1.6F, 0.0F);
+            projectile.shoot(toX, 0, toZ, this.plantStatFloat(PlantStatManager.PROJECTILE_SPEED, 1.6D), 0.0F);
 
             this.playSound(PVZSounds.PUFF_SHROOM_SHOOT.get(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
 
@@ -153,9 +154,10 @@ public class ScaredyShroom extends EntityPlantShooterBase {
         if (!this.level().isClientSide) {
             boolean hasMonsterNearby = hasMonsterWithinFearRange();
 
-            if ((hasMonsterNearby || this.getScaredTime() > 0) && this.getScaredTime() < 20 && !this.isScared()) {
+            int hideTicks = hideTicks();
+            if ((hasMonsterNearby || this.getScaredTime() > 0) && this.getScaredTime() < hideTicks && !this.isScared()) {
                 this.setScaredTime(this.getScaredTime() + 1);
-                if (this.getScaredTime() == 20) {
+                if (this.getScaredTime() == hideTicks) {
                     // 触发缩回
                     this.setScared(true);
                     this.level().broadcastEntityEvent(this, (byte) 5);
@@ -174,7 +176,7 @@ public class ScaredyShroom extends EntityPlantShooterBase {
     }
 
     private boolean hasMonsterWithinFearRange() {
-        double halfSize = 2.5D;
+        double halfSize = this.plantStatDouble("fear_range", 2.5D);
         AABB box = new AABB(
                 this.getX() - halfSize, this.getY(), this.getZ() - halfSize,
                 this.getX() + halfSize, this.getY() + halfSize, this.getZ() + halfSize
@@ -214,7 +216,7 @@ public class ScaredyShroom extends EntityPlantShooterBase {
             case HIDING -> {
                 if (this.hideAnimation.isStarted()) {
                     this.hideTickCounter++;
-                    if (this.hideTickCounter >= 20) {
+                    if (this.hideTickCounter >= hideTicks()) {
                         animationState = ShroomState.HIDDEN;
                         this.hiddenAnimation.start(this.tickCount);
                         this.hideAnimation.stop();
@@ -238,7 +240,7 @@ public class ScaredyShroom extends EntityPlantShooterBase {
                     animationState = ShroomState.STANDING_UP;
                     this.standAnimation.start(this.tickCount);
                     this.hiddenAnimation.stop();
-                    this.hideTickCounter = 20;
+                    this.hideTickCounter = hideTicks();
                     this.shootAnimationState.stop();
                 }
             }
@@ -268,7 +270,7 @@ public class ScaredyShroom extends EntityPlantShooterBase {
             this.standAnimation.start(this.tickCount);
             this.hiddenAnimation.stop();
             this.hideAnimation.stop();
-            this.hideTickCounter = 20;
+            this.hideTickCounter = hideTicks();
         }
     }
 
@@ -276,5 +278,9 @@ public class ScaredyShroom extends EntityPlantShooterBase {
     @Override
     public void handleStartShootEvent() {
         this.shootAnimationState.start(this.tickCount);
+    }
+
+    private int hideTicks() {
+        return this.plantStatInt("hide_ticks", 20, 1, 72000);
     }
 }

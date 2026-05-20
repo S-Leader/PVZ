@@ -4,6 +4,7 @@ import keletu.pvzmod.entities.ai.TrueRangedAttackGoal;
 import keletu.pvzmod.entities.projectile.SporeProjectile;
 import keletu.pvzmod.init.PVZItems;
 import keletu.pvzmod.init.PVZSounds;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
@@ -36,13 +37,13 @@ public class PuffShroom extends EntityPlantShooterBase {
 
     @Override
     public ThrowableProjectile entitySelect(Level world) {
-        SporeProjectile ent = new SporeProjectile(world, this, 3);
+        SporeProjectile ent = new SporeProjectile(world, this, this.plantStatFloat(PlantStatManager.PROJECTILE_DAMAGE, 3.0D));
         return ent;
     }
 
     @Override
     protected TrueRangedAttackGoal createRangedAttackGoal() {
-        return new TrueRangedAttackGoal(this, 0.0F, this.range, 1, 0, 30, 15);
+        return new TrueRangedAttackGoal(this, 0.0F, this.plantStatFloat(PlantStatManager.ATTACK_RANGE, 8.0D), 1, 0, 30, 15);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class PuffShroom extends EntityPlantShooterBase {
             double toX = target.getX() - this.getX();
             double toZ = target.getZ() - this.getZ();
 
-            projectile.shoot(toX, 0, toZ, 1.6F, 0.0F);
+            projectile.shoot(toX, 0, toZ, this.plantStatFloat(PlantStatManager.PROJECTILE_SPEED, 1.6D), 0.0F);
 
             this.playSound(PVZSounds.PUFF_SHROOM_SHOOT.get(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
 
@@ -78,7 +79,7 @@ public class PuffShroom extends EntityPlantShooterBase {
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return super.canAttack(target) && target.distanceTo(this) <= 8.0F;
+        return super.canAttack(target) && target.distanceTo(this) <= this.plantStatFloat(PlantStatManager.ATTACK_RANGE, 8.0D);
     }
 
     @Override

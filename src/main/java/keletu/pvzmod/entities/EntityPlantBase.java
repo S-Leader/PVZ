@@ -1,10 +1,12 @@
 package keletu.pvzmod.entities;
 
 import keletu.pvzmod.entities.ai.JumpControlNoJumping;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.*;
@@ -20,6 +22,7 @@ import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -29,6 +32,7 @@ public abstract class EntityPlantBase extends AbstractGolem implements OwnableEn
     protected static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(EntityPlantBase.class, EntityDataSerializers.OPTIONAL_UUID);
     public ItemStack spawnStack;
     public float range = 10.0F;
+    private boolean configuredStatsApplied;
 
     public EntityPlantBase(EntityType<? extends EntityPlantBase> entityType, Level level) {
         super(entityType, level);
@@ -130,6 +134,11 @@ public abstract class EntityPlantBase extends AbstractGolem implements OwnableEn
 
     @Override
     public void tick() {
+        if (!this.configuredStatsApplied) {
+            PlantStatManager.applyTo(this);
+            this.configuredStatsApplied = true;
+        }
+
         this.zza = 0.0F;
         this.xxa = 0.0F;
         this.setSpeed(0.0F);
@@ -211,5 +220,23 @@ public abstract class EntityPlantBase extends AbstractGolem implements OwnableEn
      * <p>可选重写。触发攻击动画
      */
     protected void handleStartShootEvent() {
+    }
+
+    public String plantStatsId() {
+        ResourceLocation location = ForgeRegistries.ENTITY_TYPES.getKey(this.getType());
+        return location == null ? "" : location.getPath();
+    }
+
+    public double plantStatDouble(String key, double fallback) {
+        return PlantStatManager.value(this.plantStatsId(), key, fallback);
+    }
+
+    public float plantStatFloat(String key, double fallback) {
+        return (float) this.plantStatDouble(key, fallback);
+    }
+
+    public int plantStatInt(String key, int fallback, int min, int max) {
+        int value = Mth.floor(this.plantStatDouble(key, fallback) + 0.5D);
+        return Mth.clamp(value, min, max);
     }
 }

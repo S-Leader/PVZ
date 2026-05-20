@@ -75,11 +75,10 @@ public class ElectricPeaProjectile extends ThrowableProjectile {
 
             LivingEntity owner = this.getOwner() instanceof LivingEntity livingOwner ? livingOwner : null;
 
-            if (this.random.nextInt(10) < 2) {
-                target.addEffect(new MobEffectInstance(PVZEffects.SHOCKED.get(), SHOCKED_DURATION, 0));
+            if (this.random.nextFloat() * 100.0F < shockChancePercent()) {
+                target.addEffect(new MobEffectInstance(PVZEffects.SHOCKED.get(), shockedDuration(), 0));
             }
             target.hurt(PVZDamageTypes.causeElectricPeaProjectileDamage(this.level(), this, owner), damage);
-
 
             target.invulnerableTime = 0;
 
@@ -176,7 +175,7 @@ public class ElectricPeaProjectile extends ThrowableProjectile {
             return;
         }
 
-        AABB range = this.getBoundingBox().inflate(2.0D);
+        AABB range = this.getBoundingBox().inflate(shockRange());
         java.util.List<LivingEntity> renderTargets = new java.util.ArrayList<>();
 
         for (LivingEntity living : this.level().getEntitiesOfClass(LivingEntity.class, range)) {
@@ -192,16 +191,32 @@ public class ElectricPeaProjectile extends ThrowableProjectile {
 
             living.hurt(
                     PVZDamageTypes.causeElectricPeaProjectileDamage(this.level(), this, this.getOwner()),
-                    shockDamage
+                    shockDamage()
             );
             living.invulnerableTime = 0;
-            if (this.random.nextInt(10) < 2) {
-                living.addEffect(new MobEffectInstance(PVZEffects.SHOCKED.get(), SHOCKED_DURATION, 0));
+            if (this.random.nextFloat() * 100.0F < shockChancePercent()) {
+                living.addEffect(new MobEffectInstance(PVZEffects.SHOCKED.get(), shockedDuration(), 0));
             }
 
             shockedEntities.add(living.getUUID());
         }
 
         this.setRenderTargets(renderTargets);
+    }
+
+    private float shockDamage() {
+        return this.shooter == null ? this.shockDamage : this.shooter.plantStatFloat("electric_shock_damage", this.shockDamage);
+    }
+
+    private double shockRange() {
+        return this.shooter == null ? 2.0D : this.shooter.plantStatDouble("electric_shock_range", 2.0D);
+    }
+
+    private float shockChancePercent() {
+        return this.shooter == null ? 20.0F : this.shooter.plantStatFloat("electric_shock_chance_percent", 20.0D);
+    }
+
+    private int shockedDuration() {
+        return this.shooter == null ? SHOCKED_DURATION : this.shooter.plantStatInt("electric_shocked_duration_ticks", SHOCKED_DURATION, 1, 72000);
     }
 }

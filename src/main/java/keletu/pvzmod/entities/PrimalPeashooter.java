@@ -4,6 +4,7 @@ import keletu.pvzmod.entities.ai.TrueRangedAttackGoal;
 import keletu.pvzmod.entities.projectile.PrimalPeaProjectile;
 import keletu.pvzmod.init.PVZItems;
 import keletu.pvzmod.init.PVZSounds;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -26,7 +27,7 @@ public class PrimalPeashooter extends EntityPlantShooterBase {
 
     @Override
     protected TrueRangedAttackGoal createRangedAttackGoal() {
-        return new TrueRangedAttackGoal(this, 0.0F, this.range, 1, 2, 55, 25);
+        return new TrueRangedAttackGoal(this, 0.0F, this.plantStatFloat(PlantStatManager.ATTACK_RANGE, this.range), 1, 2, 55, 25);
     }
 
     @Override
@@ -41,7 +42,12 @@ public class PrimalPeashooter extends EntityPlantShooterBase {
 
     @Override
     public ThrowableProjectile entitySelect(Level world) {
-        PrimalPeaProjectile ent = new PrimalPeaProjectile(world, this, 3, this.random.nextInt(100) < 15 ? 1 : 0);
+        PrimalPeaProjectile ent = new PrimalPeaProjectile(
+                world,
+                this,
+                this.plantStatFloat(PlantStatManager.PROJECTILE_DAMAGE, 3.0D),
+                this.random.nextFloat() * 100.0F < this.plantStatFloat("special_chance_percent", 15.0D) ? 1 : 0
+        );
         return ent;
     }
 

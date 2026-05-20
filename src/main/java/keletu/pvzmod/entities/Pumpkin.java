@@ -40,7 +40,7 @@ public class Pumpkin extends EntityPlantBase implements IProtectPlant {
             setupAnimationStates();
         }
 
-        if (this.level().isClientSide || this.tickCount % RETARGET_INTERVAL != 0) {
+        if (this.level().isClientSide || this.tickCount % retargetInterval() != 0) {
             return;
         }
 
@@ -52,9 +52,10 @@ public class Pumpkin extends EntityPlantBase implements IProtectPlant {
             }
         }
 
+        double protectRadius = protectRadius();
         AABB searchBox = new AABB(
-                this.getX() - protectRadio, this.getY(), this.getZ() - protectRadio,
-                this.getX() + protectRadio, this.getY() + 1.0D, this.getZ() + protectRadio
+                this.getX() - protectRadius, this.getY(), this.getZ() - protectRadius,
+                this.getX() + protectRadius, this.getY() + 1.0D, this.getZ() + protectRadius
         );
 
         List<Mob> nearbyMobs = this.level().getEntitiesOfClass(Mob.class, searchBox);
@@ -85,5 +86,13 @@ public class Pumpkin extends EntityPlantBase implements IProtectPlant {
 
     public void setupAnimationStates() {
         this.idleAnimation.startIfStopped(this.tickCount);
+    }
+
+    private double protectRadius() {
+        return this.plantStatDouble("protect_radius", this.protectRadio);
+    }
+
+    private int retargetInterval() {
+        return this.plantStatInt("retarget_interval_ticks", RETARGET_INTERVAL, 1, 72000);
     }
 }

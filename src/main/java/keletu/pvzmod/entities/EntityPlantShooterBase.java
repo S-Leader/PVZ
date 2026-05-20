@@ -4,6 +4,7 @@ import keletu.pvzmod.entities.ai.PlanterHurtByTargetGoal;
 import keletu.pvzmod.entities.ai.PlanterHurtTargetGoal;
 import keletu.pvzmod.entities.ai.TrueRangedAttackGoal;
 import keletu.pvzmod.init.PVZSounds;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -51,7 +52,7 @@ public abstract class EntityPlantShooterBase extends EntityPlantBase implements 
     }
 
     protected Goal createRangedAttackGoal() {
-        return new TrueRangedAttackGoal(this, 0.0F, this.range, 1, 0, 30, 25);
+        return new TrueRangedAttackGoal(this, 0.0F, this.plantStatFloat(PlantStatManager.ATTACK_RANGE, this.range), 1, 0, 30, 25);
     }
 
     public boolean hasAttackLineOfSight(LivingEntity target) {
@@ -78,7 +79,7 @@ public abstract class EntityPlantShooterBase extends EntityPlantBase implements 
                 toZ = look.z;
             }
 
-            projectile.shoot(toX, 0, toZ, 1.6F, 0.0F);
+            projectile.shoot(toX, 0, toZ, this.plantStatFloat(PlantStatManager.PROJECTILE_SPEED, 1.6D), 0.0F);
 
             this.level().addFreshEntity(projectile);
 

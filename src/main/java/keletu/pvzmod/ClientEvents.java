@@ -2,12 +2,15 @@ package keletu.pvzmod;
 
 import keletu.pvzmod.init.PVZBlocks;
 import keletu.pvzmod.init.PVZEntities;
+import keletu.pvzmod.init.PVZMenus;
 import keletu.pvzmod.init.PVZParticles;
 import keletu.pvzmod.models.*;
 import keletu.pvzmod.particles.SporeParticle;
 import keletu.pvzmod.particles.TextureBreakParticle;
+import keletu.pvzmod.penny.client.PennyTradeScreen;
 import keletu.pvzmod.potion.SlowBlueLayer;
 import keletu.pvzmod.potion.StunStarsLayer;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -19,10 +22,15 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber(modid = PVZMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientEvents {
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> MenuScreens.register(PVZMenus.PENNY_TRADE.get(), PennyTradeScreen::new));
+    }
 
     @SubscribeEvent
     public static void onAddLayers(EntityRenderersEvent.AddLayers event) {

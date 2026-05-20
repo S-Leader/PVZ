@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import keletu.pvzmod.box.PlantBoxManager;
 import keletu.pvzmod.init.*;
 import keletu.pvzmod.network.PVZNetworking;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -23,6 +24,7 @@ public class PVZMod {
         PVZBlocks.BLOCKS.register(modEventBus);
         PVZBlocks.BLOCK_ENTITIES.register(modEventBus);
         PVZItems.ITEMS.register(modEventBus);
+        PVZMenus.MENUS.register(modEventBus);
         PVZEntities.ENTITIES.register(modEventBus);
         PVZEffects.EFFECTS.register(modEventBus);
         PVZSounds.SOUNDS.register(modEventBus);
@@ -39,6 +41,7 @@ public class PVZMod {
         PVZNetworking.register();
         event.enqueueWork(() -> {
             PlantBoxManager.loadOrCreateDefaults();
+            PlantStatManager.loadOrCreateDefaults();
         });
     }
 }

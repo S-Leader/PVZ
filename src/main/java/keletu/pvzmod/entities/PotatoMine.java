@@ -27,8 +27,6 @@ public class PotatoMine extends EntityPlantBase {
     public final AnimationState idleAnimationState2 = new AnimationState();
     public final AnimationState growAnimation = new AnimationState();
     public final AnimationState boomAnimation = new AnimationState();
-    private final int waitTime = 315;
-    private final int growTime = 20;
     private static final EntityDataAccessor<Integer> GROW_TIME = SynchedEntityData.defineId(PotatoMine.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> BOOM_TIME = SynchedEntityData.defineId(PotatoMine.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> START_BOOM = SynchedEntityData.defineId(PotatoMine.class, EntityDataSerializers.BOOLEAN);
@@ -94,8 +92,9 @@ public class PotatoMine extends EntityPlantBase {
     public void tick() {
         super.tick();
 
+        int waitTime = waitTime();
         if (this.getGrowTime() >= waitTime && !this.startBoom()) {
-            double triggerRadius = 1.0D;
+            double triggerRadius = this.plantStatDouble("trigger_radius", 1.0D);
             for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(triggerRadius))) {
                 if (entity instanceof Mob mob && mob != this.getOwner() && !(mob instanceof IPlantWontHurt)) {
                     this.setStartBoom(true);
@@ -112,7 +111,7 @@ public class PotatoMine extends EntityPlantBase {
             this.setBoomTime(this.getBoomTime() + 1);
         }
 
-        if (this.getBoomTime() == 15) {
+        if (this.getBoomTime() == this.plantStatInt("explosion_fuse_ticks", 15, 1, 72000)) {
             explodeAndDamage();
             this.remove(RemovalReason.DISCARDED);
         }
@@ -127,8 +126,8 @@ public class PotatoMine extends EntityPlantBase {
 
         ServerLevel serverLevel = (ServerLevel) this.level();
 
-        double radius = 3.0D;
-        float maxDamage = 90.0F;
+        double radius = this.plantStatDouble("explosion_radius", 3.0D);
+        float maxDamage = this.plantStatFloat("explosion_damage", 90.0D);
 
         serverLevel.playSound(null, this.blockPosition(),
                 SoundEvents.GENERIC_EXPLODE,
@@ -177,7 +176,7 @@ public class PotatoMine extends EntityPlantBase {
 
     @Override
     protected void doPush(Entity entity) {
-        if (entity instanceof Mob && this.getGrowTime() >= waitTime) {
+        if (entity instanceof Mob && this.getGrowTime() >= waitTime()) {
             this.setStartBoom(true);
         }
     }
@@ -200,6 +199,8 @@ public class PotatoMine extends EntityPlantBase {
     }
 
     private void setupAnimationStates() {
+        int waitTime = waitTime();
+        int growTime = this.plantStatInt("grow_animation_ticks", 20, 0, 72000);
         if (this.getBoomTime() > 0) {
             this.idleAnimationState.stop();
             this.idleAnimationState2.stop();
@@ -221,5 +222,9 @@ public class PotatoMine extends EntityPlantBase {
             this.boomAnimation.stop();
             this.idleAnimationState2.startIfStopped(this.tickCount);
         }
+    }
+
+    private int waitTime() {
+        return this.plantStatInt("grow_wait_ticks", 315, 1, 72000);
     }
 }

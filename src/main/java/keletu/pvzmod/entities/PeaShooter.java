@@ -2,6 +2,7 @@ package keletu.pvzmod.entities;
 
 import keletu.pvzmod.entities.projectile.PeaProjectile;
 import keletu.pvzmod.init.PVZItems;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.AnimationState;
@@ -29,7 +30,7 @@ public class PeaShooter extends EntityPlantShooterBase {
 
     @Override
     public ThrowableProjectile entitySelect(Level world) {
-        PeaProjectile ent = new PeaProjectile(world, this, 3);
+        PeaProjectile ent = new PeaProjectile(world, this, this.plantStatFloat(PlantStatManager.PROJECTILE_DAMAGE, 3.0D));
         return ent;
     }
 

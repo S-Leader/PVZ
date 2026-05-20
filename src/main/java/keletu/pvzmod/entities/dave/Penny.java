@@ -2,11 +2,18 @@ package keletu.pvzmod.entities.dave;
 
 import keletu.pvzmod.entities.IPlantWontHurt;
 import keletu.pvzmod.init.PVZSounds;
+import keletu.pvzmod.penny.PennyTradeMenu;
+import keletu.pvzmod.penny.PennyTradeOffer;
+import keletu.pvzmod.penny.PennyTradeOffers;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -19,7 +26,10 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class Penny extends PathfinderMob implements Npc, Merchant, IPlantWontHurt {
 
@@ -27,6 +37,8 @@ public class Penny extends PathfinderMob implements Npc, Merchant, IPlantWontHur
     private MerchantOffers trades;
     private @Nullable Player customer;
     private int pennyXp;
+    private List<PennyTradeOffer> currentPlantTrades = List.of();
+    public final AnimationState idleAnimation = new AnimationState();
 
     public Penny(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -134,28 +146,23 @@ public class Penny extends PathfinderMob implements Npc, Merchant, IPlantWontHur
         double ySize = 4.0D;
         double zSize = 8.0D;
 
-        return new AABB(
-                this.getX() - xSize / 2.0D,
-                this.getY(),
-                this.getZ() - zSize / 2.0D,
-                this.getX() + xSize / 2.0D,
-                this.getY() + ySize,
-                this.getZ() + zSize / 2.0D
-        );
+        return new AABB(this.getX() - xSize / 2.0D, this.getY(), this.getZ() - zSize / 2.0D, this.getX() + xSize / 2.0D, this.getY() + ySize, this.getZ() + zSize / 2.0D);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return PathfinderMob.createMobAttributes()
-                .add(Attributes.KNOCKBACK_RESISTANCE, 10.0F)
-                .add(Attributes.MAX_HEALTH, 100.0F);
+        return PathfinderMob.createMobAttributes().add(Attributes.KNOCKBACK_RESISTANCE, 10.0F).add(Attributes.MAX_HEALTH, 100.0F);
     }
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (this.isAlive() && !this.isTrading() && !player.isShiftKeyDown() && this.getTarget() != player) {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
                 this.setTradingPlayer(player);
-                this.openTradingScreen(player, this.getDisplayName(), 0);
+                this.currentPlantTrades = PennyTradeOffers.roll(this.getRandom());
+                NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider((containerId, inventory, menuPlayer) -> new PennyTradeMenu(containerId, inventory, this, this.currentPlantTrades), Component.translatable("screen.pvz_myh.penny.title")), buffer -> {
+                    buffer.writeVarInt(this.getId());
+                    PennyTradeOffer.encodeList(this.currentPlantTrades, buffer);
+                });
             }
 
             return InteractionResult.SUCCESS;
@@ -167,5 +174,18 @@ public class Penny extends PathfinderMob implements Npc, Merchant, IPlantWontHur
     @Override
     public boolean canBeCollidedWith() {
         return true;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        if (this.level().isClientSide()) {
+            setupAnimationStates();
+        }
+    }
+
+    private void setupAnimationStates() {
+        this.idleAnimation.start(this.tickCount);
     }
 }

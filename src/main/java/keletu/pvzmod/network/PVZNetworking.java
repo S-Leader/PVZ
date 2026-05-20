@@ -41,6 +41,41 @@ public final class PVZNetworking {
                 StartPlantBoxOpenPacket::decode,
                 StartPlantBoxOpenPacket::handle
         );
+        channel.registerMessage(
+                nextId(),
+                OpenPlantStatsConfigPacket.class,
+                OpenPlantStatsConfigPacket::encode,
+                OpenPlantStatsConfigPacket::decode,
+                OpenPlantStatsConfigPacket::handle
+        );
+        channel.registerMessage(
+                nextId(),
+                SavePlantStatsConfigPacket.class,
+                SavePlantStatsConfigPacket::encode,
+                SavePlantStatsConfigPacket::decode,
+                SavePlantStatsConfigPacket::handle
+        );
+        channel.registerMessage(
+                nextId(),
+                BuyPennyTradePacket.class,
+                BuyPennyTradePacket::encode,
+                BuyPennyTradePacket::decode,
+                BuyPennyTradePacket::handle
+        );
+        channel.registerMessage(
+                nextId(),
+                RefreshPennyTradesPacket.class,
+                RefreshPennyTradesPacket::encode,
+                RefreshPennyTradesPacket::decode,
+                RefreshPennyTradesPacket::handle
+        );
+        channel.registerMessage(
+                nextId(),
+                SyncPennyTradeOffersPacket.class,
+                SyncPennyTradeOffersPacket::encode,
+                SyncPennyTradeOffersPacket::decode,
+                SyncPennyTradeOffersPacket::handle
+        );
     }
 
     public static void sendToPlayer(Object packet, ServerPlayer player) {

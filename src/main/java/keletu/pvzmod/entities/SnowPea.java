@@ -2,6 +2,7 @@ package keletu.pvzmod.entities;
 
 import keletu.pvzmod.entities.projectile.SnowPeaProjectile;
 import keletu.pvzmod.init.PVZItems;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.AnimationState;
@@ -28,7 +29,7 @@ public class SnowPea extends EntityPlantShooterBase {
 
     @Override
     public ThrowableProjectile entitySelect(Level world) {
-        SnowPeaProjectile ent = new SnowPeaProjectile(world, this, 3);
+        SnowPeaProjectile ent = new SnowPeaProjectile(world, this, this.plantStatFloat(PlantStatManager.PROJECTILE_DAMAGE, 3.0D));
         return ent;
     }
 

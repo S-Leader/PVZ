@@ -62,11 +62,14 @@ public class PrimalPeaProjectile extends ThrowableProjectile {
         }
 
         if (!this.level().isClientSide && result.getEntity() instanceof LivingEntity mob) {
-            if (this.random.nextInt(100) < 50) {
-                mob.addEffect(new MobEffectInstance(PVZEffects.STUN.get(), 10));
+            float stunChance = this.shooter == null ? 50.0F : this.shooter.plantStatFloat("primal_stun_chance_percent", 50.0D);
+            if (this.random.nextFloat() * 100.0F < stunChance) {
+                int stunDuration = this.shooter == null ? 10 : this.shooter.plantStatInt("primal_stun_duration_ticks", 10, 1, 72000);
+                mob.addEffect(new MobEffectInstance(PVZEffects.STUN.get(), stunDuration));
             } else {
                 Vec3 motion = this.getDeltaMovement();
-                mob.knockback(2.5D, -motion.x, -motion.z);
+                double knockback = this.shooter == null ? 2.5D : this.shooter.plantStatDouble("primal_knockback_strength", 2.5D);
+                mob.knockback(knockback, -motion.x, -motion.z);
             }
 
             Vec3 oldMotion = target.getDeltaMovement();
@@ -75,10 +78,11 @@ public class PrimalPeaProjectile extends ThrowableProjectile {
             boolean oldHurtMarked = target.hurtMarked;
 
             LivingEntity owner = this.getOwner() instanceof LivingEntity livingOwner ? livingOwner : null;
+            float multiplier = this.shooter == null ? 2.0F : this.shooter.plantStatFloat("special_damage_multiplier", 2.0D);
 
             target.hurt(
                     this.damageSources().mobProjectile(this, owner),
-                    this.damage
+                    getProjectileType() == 1 ? this.damage * multiplier : this.damage
             );
 
             target.invulnerableTime = 0;

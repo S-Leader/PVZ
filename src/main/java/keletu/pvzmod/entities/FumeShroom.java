@@ -3,6 +3,7 @@ package keletu.pvzmod.entities;
 import keletu.pvzmod.entities.ai.TrueRangedAttackGoal;
 import keletu.pvzmod.init.PVZItems;
 import keletu.pvzmod.init.PVZParticles;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -21,9 +22,6 @@ public class FumeShroom extends EntityPlantShooterBase {
 
     public final AnimationState idleAnimationState = new AnimationState();
     public final AnimationState shootAnimationState = new AnimationState();
-    private static final float BEAM_LENGTH = 10.0F;
-    private static final float BEAM_RADIUS = 1.25F;
-    private static final float BEAM_DAMAGE = 2.0F;
     private static final double BEAM_KNOCKBACK = 0.04D;
 
     public FumeShroom(EntityType<? extends EntityPlantShooterBase> entityType, Level par1World) {
@@ -37,7 +35,7 @@ public class FumeShroom extends EntityPlantShooterBase {
 
     @Override
     protected TrueRangedAttackGoal createRangedAttackGoal() {
-        return new TrueRangedAttackGoal(this, 0.0F, this.range, 1, 0, 50, 40);
+        return new TrueRangedAttackGoal(this, 0.0F, this.plantStatFloat(PlantStatManager.ATTACK_RANGE, this.range), 1, 0, 50, 40);
     }
 
     @Override
@@ -60,11 +58,11 @@ public class FumeShroom extends EntityPlantShooterBase {
         }
 
         Vec3 nozzle = new Vec3(this.getX(), this.getY() + 0.7D, this.getZ()).add(dir.scale(0.45D));
-        Vec3 end = nozzle.add(dir.scale(BEAM_LENGTH));
+        Vec3 end = nozzle.add(dir.scale(beamLength()));
 
-        damageEntitiesAlongBeam(nozzle, end, BEAM_RADIUS, BEAM_DAMAGE);
+        damageEntitiesAlongBeam(nozzle, end, beamRadius(), beamDamage());
 
-        List<LivingEntity> hits = getEntitiesAlongBeam(nozzle, end, BEAM_RADIUS);
+        List<LivingEntity> hits = getEntitiesAlongBeam(nozzle, end, beamRadius());
         for (LivingEntity hit : hits) {
             if (hit instanceof PathfinderMob mob) {
                 if (mob.getTarget() == null || !mob.getTarget().isAlive()) {
@@ -161,7 +159,7 @@ public class FumeShroom extends EntityPlantShooterBase {
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return super.canAttack(target) && target.distanceTo(this) <= BEAM_LENGTH + 2.0F;
+        return super.canAttack(target) && target.distanceTo(this) <= beamLength() + 2.0F;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -190,5 +188,17 @@ public class FumeShroom extends EntityPlantShooterBase {
     @Override
     public void handleStartShootEvent() {
         this.shootAnimationState.start(this.tickCount);
+    }
+
+    private float beamLength() {
+        return this.plantStatFloat("beam_length", 10.0D);
+    }
+
+    private float beamRadius() {
+        return this.plantStatFloat("beam_radius", 1.25D);
+    }
+
+    private float beamDamage() {
+        return this.plantStatFloat("beam_damage", 2.0D);
     }
 }

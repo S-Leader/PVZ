@@ -2,6 +2,7 @@ package keletu.pvzmod.entities.ai;
 
 import keletu.pvzmod.entities.SuperGatlingPea;
 import keletu.pvzmod.init.PVZSounds;
+import keletu.pvzmod.plantconfig.PlantStatManager;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -14,7 +15,6 @@ public class TrueSuperRangedAttackGoal extends Goal {
     private final double speedModifier;
     private int attackTime = -1;
     private final float attackRadius;
-    private final float attackRadiusSqr;
     private int seeTime;
     private final int burstCount;
     private final int burstDelay;
@@ -37,7 +37,6 @@ public class TrueSuperRangedAttackGoal extends Goal {
         this.mob = attacker;
         this.speedModifier = speedModifier;
         this.attackRadius = attackRadius;
-        this.attackRadiusSqr = attackRadius * attackRadius;
         this.burstCount = Math.max(1, burstCount);
         this.burstDelay = Math.max(0, burstDelay);
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
@@ -49,7 +48,7 @@ public class TrueSuperRangedAttackGoal extends Goal {
         if (livingentity != null && livingentity.isAlive()) {
             this.target = livingentity;
             this.mob.setShooting(true);
-            this.attackTime = this.cooldown_first;
+            this.attackTime = cooldownFirst();
             return true;
         }
         return false;
@@ -95,6 +94,7 @@ public class TrueSuperRangedAttackGoal extends Goal {
 
         double living = this.mob.distanceToSqr(this.target.getX(), this.target.getY(), this.target.getZ());
         boolean hasSight = this.mob.getSensing().hasLineOfSight(this.target);
+        float currentAttackRadius = attackRadius();
 
         if (hasSight) {
             ++this.seeTime;
@@ -102,7 +102,7 @@ public class TrueSuperRangedAttackGoal extends Goal {
             this.seeTime = 0;
         }
 
-        if (!(living > (double) this.attackRadiusSqr) && this.seeTime >= 5) {
+        if (!(living > (double) (currentAttackRadius * currentAttackRadius)) && this.seeTime >= 5) {
             this.mob.getNavigation().stop();
         } else {
             this.mob.getNavigation().moveTo(this.target, this.speedModifier);
@@ -114,19 +114,19 @@ public class TrueSuperRangedAttackGoal extends Goal {
             --this.burstTimer;
             if (this.burstTimer <= 0) {
                 if (hasSight && this.target != null && this.target.isAlive()) {
-                    float f2 = (float) Math.sqrt(living) / this.attackRadius;
+                    float f2 = (float) Math.sqrt(living) / currentAttackRadius;
                     float f3 = Mth.clamp(f2, 0.1F, 1.0F);
                     this.mob.performRangedAttack(this.target, f3);
                 }
                 --this.remainingShots;
 
                 if (this.remainingShots > 0) {
-                    this.burstTimer = this.burstDelay;
+                    this.burstTimer = burstDelay();
                 }
             }
         }
 
-        if (attackTime == cooldown_first) {
+        if (attackTime == cooldownFirst()) {
             tryTriggerSuperRapidFire();
         }
         if (--this.attackTime == 0) {
@@ -134,20 +134,20 @@ public class TrueSuperRangedAttackGoal extends Goal {
                 return;
             }
 
-            float f2 = (float) Math.sqrt(living) / this.attackRadius;
+            float f2 = (float) Math.sqrt(living) / currentAttackRadius;
             float f3 = Mth.clamp(f2, 0.1F, 1.0F);
 
             this.mob.playSound(this.mob.getShootSound(), 1.0F, 1.0F / (this.mob.getRandom().nextFloat() * 0.4F + 0.8F));
             this.mob.performRangedAttack(this.target, f3);
 
-            this.remainingShots = this.burstCount - 1;
+            this.remainingShots = burstCount() - 1;
             if (this.remainingShots > 0) {
-                this.burstTimer = this.burstDelay;
+                this.burstTimer = burstDelay();
             }
 
-            this.attackTime = cooldown;
+            this.attackTime = cooldown();
         } else if (this.attackTime < 0) {
-            this.attackTime = cooldown_first;
+            this.attackTime = cooldownFirst();
         }
     }
 
@@ -162,12 +162,32 @@ public class TrueSuperRangedAttackGoal extends Goal {
     }
 
     private void tryTriggerSuperRapidFire() {
-        if (this.mob.canTriggerSuperRapidFire() && this.mob.getRandom().nextFloat() < SuperGatlingPea.SUPER_RAPID_FIRE_CHANCE) {
+        if (this.mob.canTriggerSuperRapidFire() && this.mob.getRandom().nextFloat() < this.mob.superRapidFireChance()) {
             this.mob.triggerSuperRapidFire();
             this.mob.playSound(PVZSounds.SUPERGATLINGPEA_POWER.get(), 1.0F, 1.0F / (this.mob.getRandom().nextFloat() * 0.4F + 0.8F));
             this.mob.level().broadcastEntityEvent(this.mob, (byte) 5);
         } else {
             this.mob.level().broadcastEntityEvent(this.mob, (byte) 4);
         }
+    }
+
+    private float attackRadius() {
+        return Math.max(0.1F, this.mob.plantStatFloat(PlantStatManager.ATTACK_RANGE, this.attackRadius));
+    }
+
+    private int burstCount() {
+        return this.mob.plantStatInt(PlantStatManager.BURST_COUNT, this.burstCount, 1, 128);
+    }
+
+    private int burstDelay() {
+        return this.mob.plantStatInt(PlantStatManager.BURST_DELAY_TICKS, this.burstDelay, 0, 72000);
+    }
+
+    private int cooldown() {
+        return this.mob.plantStatInt(PlantStatManager.COOLDOWN_TICKS, this.cooldown, 1, 72000);
+    }
+
+    private int cooldownFirst() {
+        return this.mob.plantStatInt(PlantStatManager.FIRST_COOLDOWN_TICKS, this.cooldown_first, 1, 72000);
     }
 }

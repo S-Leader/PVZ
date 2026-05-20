@@ -2,7 +2,6 @@ package keletu.pvzmod.command;
 
 import keletu.pvzmod.PVZMod;
 import keletu.pvzmod.entities.SuperGatlingPea;
-import keletu.pvzmod.init.PVZSounds;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,10 +40,7 @@ public final class PVZTestCommands {
             return 0;
         }
 
-        target.setSuperTick(SuperGatlingPea.SUPER_RAPID_FIRE_DURATION);
-        target.setSuperCooldown(0);
-        target.playSound(PVZSounds.SUPERGATLINGPEA_POWER.get(), 1.0F, 1.0F);
-        return 1;
+        return target.activateEnergyBean(null) ? 1 : 0;
     }
 
     private static SuperGatlingPea findTarget(ServerPlayer player) {
