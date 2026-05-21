@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import keletu.pvzmod.PVZMod;
 import keletu.pvzmod.entities.dave.Penny;
-import keletu.pvzmod.models.anim.GatlingPeaModelAnimation;
+import keletu.pvzmod.models.anim.PennyModelAnimation;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -733,6 +733,6 @@ public class PennyModel extends HierarchicalModel<Penny> {
     public void setupAnim(Penny entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.root().getAllParts().forEach(ModelPart::resetPose);
 
-        this.animate(entity.idleAnimation, GatlingPeaModelAnimation.stand, ageInTicks, 1.0F);
+        this.animate(entity.idleAnimation, PennyModelAnimation.idle, ageInTicks, 1.0F);
     }
 }
